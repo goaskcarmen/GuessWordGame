@@ -52,13 +52,15 @@
 # Allow the user to choose their difficulty level: higher levels will have words or phrases with more letters. You determine the specific logic that will determine a low, medium, high level.
 # Allow the program to accept the whole word as input from the user. If the word is guessed correctly, the user will win. Otherwise, it will be treated as another guess.
 ################################################################
-require "faker"
+require 'faker'
+require 'colorize'
 
 class Game
   attr_reader :word
 
   def initialize(level)
-    @word = assignWord(level)
+    # @word = assignWord(level) 
+    @word = 'joanna' 
 
 
   end
@@ -69,6 +71,7 @@ class Game
       begin
         @assignedword = Faker::Hipster.word
       end until @assignedword.length <= 6
+      # infinte loop if database without words > 8 letters
     elsif level == "2"
       begin
         @assignedword = Faker::Hipster.word
@@ -84,7 +87,8 @@ class Game
 end
 
 ####### MAIN PROGRAM #########
-#separate each letter into an array
+# Does this refer to the word returned by FAKER or the word the user guessess?
+#separate each letter into an array 
 def wordArray(guessword)
   word_array = []
 
@@ -94,7 +98,8 @@ def wordArray(guessword)
   return word_array
 end
 
-#generate an output array with the same legth as the word array
+# Is the output array the array that shows the users correct guessess on the board? 
+#generate an output array with the same length as the word array
 def outputArray(word)
   Array.new(word.length, "_")
 end
@@ -103,8 +108,8 @@ end
 def prompt(output_array, unmatch_array, word)
   puts "\nGuess a letter."
   letter = gets.chomp.downcase
-  if letter =~ /[A-Za-z]/ || letter == " "
 
+  if letter =~ /[A-Za-z]/ || letter == " " || letter == "-"
   else
     puts "Incorrect input. Try again."
     prompt(output_array, unmatch_array, word)
@@ -112,7 +117,7 @@ def prompt(output_array, unmatch_array, word)
 
 #verify if a string entered by the user is equal to the word
   if letter == word
-    puts "You have won the game!"
+    puts "You have won the game!"  
     exit
   end
 
@@ -123,10 +128,11 @@ def prompt(output_array, unmatch_array, word)
       prompt(output_array, unmatch_array, word)
     end
   end
+
 #verify if the user's guess has already been entered (in the unmatch_array)
   unmatch_array.each do |ea|
     if letter == ea
-      puts "This character has been entered."
+      puts "This character has already been entered."
       prompt(output_array, unmatch_array, word)
     end
   end
@@ -138,7 +144,9 @@ def display(output_array)
   output_array.each do |i|
     print "#{i} "
   end
+# TODO jm-rives puts bug build and seg build here?
 end
+
 
 def match_letter(word_array, letter, output_array)
   word_array.length.times do |i|
@@ -147,6 +155,7 @@ def match_letter(word_array, letter, output_array)
     end
   end
   return output_array
+# TODO jm_rives OR puts bug build here and seg build here, bind seg buiild to out put array length?
 end
 
 #generate an array for all the unmatched letters that the user entered
@@ -164,10 +173,37 @@ end
 
 ##### USER INTERFACE CODE #####
 
+# TODO: jm-rives place bug methods below this line
+def basic_bug
+  puts bug_line_1 = " ----\\----/".colorize(:green)
+  puts bug_line_2 = "/    \/ @ @ \\".colorize(:green)
+  puts bug_line_3 = "l====L\__v__/".colorize(:green)
+end
+
+def bug_segment(win, default=0)
+  reward = win - default
+  reward.times do
+  puts extend_bug_line_1 = " ---- ".colorize(:green)
+  puts extend_bug_line_2 = "/    \\".colorize(:green)
+  puts extend_bug_line_3 = "l====l".colorize(:green)
+  end
+end
+
 play = "y"
 
 while play == "y"
-  puts "Welcome to the Word Guess Game!"
+  puts 
+  """
+  ##################################################\n
+  Welcome to the Hipster Word Guess Game! 
+  Guess correctly and your catipillar grows strong. 
+  Guess incorrectly and your catipillar fails to thrive. 
+  And iff you lose ... so does the catipillar.
+  ##################################################
+  """
+
+  puts "Here is your companion catipillar."
+  basic_bug
 
   begin
     puts "Please enter the difficulty level (1, 2, 3)."
@@ -188,7 +224,7 @@ while play == "y"
   unmatch_array = []
 
   (word_array.length + 2).times do |chance|
-    puts "You have #{(word_array.length + 2)-chance} chance(s)."
+    puts "You have #{(word_array.length + 2) - chance} chance(s)."
     character = prompt(output_array, unmatch_array, game.word) # output_array and unmatch_array are passed to the method to keep track of all the characters that have been entered by the user. If a repeated character is entered, the user will not be penalized. The number of chances remain the same. The user is allowed to enter a string. If the string == the word, the user has won the game. "game.word" is passed to the method to verify if the string entered by the user is equal to the word.
     output_array = match_letter(word_array, character, output_array)
     print "Word: "
@@ -203,15 +239,36 @@ while play == "y"
       display(unmatch_array)
       puts ""
     end
-
+# Produces winning ASCII output as desired
     if output_array === word_array
       puts "You have won the game!"
+      basic_bug
+      bug_segment(word_array.size)
       exit
     end
   end
 
+  def dead_bug
+    puts bug_line_1 = " ----\\----/".colorize(:white)
+    puts bug_line_2 = "/    \/ x x \\".colorize(:white)
+    puts bug_line_3 = "l====L\__^__/".colorize(:white)
+  end
+
   puts "\nYou lost!"
+  puts "Just look at your poor catipillar!"
+  dead_bug
+  reward = word_array.size - unmatch_array.size
+  puts reward
   puts "The correct word is: #{(game.word).upcase}"
   puts "Do you want to try again? Enter \"y\" to play again."
   play = gets.chomp.downcase
 end
+
+# Some unexpeted output
+# TODO: EXTEND PROGRAM TO HANDLE non-alpha content from  :FAKER
+# Just look at your poor catipillar!
+#  ----\----/
+# /    / x x \
+# l====L__^__/
+# The correct word is: 90'S 
+
